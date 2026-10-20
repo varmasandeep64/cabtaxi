@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# next.js build output
+.next/
+out/
+
+# secrets — never commit these
+.env
+.env*.local
+
+# editor / OS
+.vs/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# logs
+npm-debug.log*
+yarn-debug.log*
