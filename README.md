@@ -1,67 +1,67 @@
-# cabTaxi — Cab Booking App (Rapido / Uber clone)
+# cabTaxi - Cab Booking App (Rapido / Uber clone)
 
-A full-stack ride-hailing web app built for the **Labmentix internship project**.
-Riders book and pay for rides on a live map; drivers accept and complete trips; riders track status live, rate the driver and download receipts.
+This is my internship project for Labmentix. its a full stack cab booking web app, rider can book a cab on map and pay online, driver can accept the ride and complete it. rider can track ride status live, give rating to driver and download the receipt.
 
-## Tech stack
+i made it mobile first so it look like real app on phone.
 
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 16 (App Router), React 19, Tailwind CSS |
-| Auth | Clerk (email + social login) |
-| Maps & routing | Leaflet + OpenStreetMap tiles, Nominatim (geocoding), OSRM (driving routes) |
-| Payments | Stripe Payment Element (INR, test mode) + Stripe refunds |
-| Backend | Next.js API routes (Node.js) |
-| Database | Supabase (PostgreSQL) with Row Level Security |
+## Tech Stack
+
+- **Frontend** - Next.js 16 (App Router), React 19, Tailwind CSS
+- **Auth** - Clerk (email and google login)
+- **Map** - Leaflet with OpenStreetMap, Nominatim for address search, OSRM for driving route
+- **Payment** - Stripe (INR, test mode) + refund on cancel
+- **Backend** - Next.js API routes (Node js)
+- **Database** - Supabase (PostgreSQL) with Row Level Security on
 
 ## Features
 
-**Rider**
-- Sign up / log in with Clerk; protected pages
-- Choose pickup & drop-off by search (autocomplete), GPS, clicking the map, or dragging pins
-- Real driving route, distance and ETA on the map
-- Fare estimate per ride type (cabTaxi Go / Premier)
-- Secure Stripe payment — fare is recalculated on the server so it can't be tampered with
-- Live ride tracking: *Finding driver → Driver accepted → Trip started → Completed*
-- Cancel a ride: full refund before a driver accepts, ₹25 fee after (refund via Stripe)
-- Rate the driver (1–5 stars + feedback) after the trip
-- Ride history and downloadable PDF receipts
+**Rider side**
+- sign up / login with Clerk, all pages are protected after login
+- select pickup and drop location by search, GPS, clicking on map or dragging the pin
+- shows real driving route, distance and time on map
+- fare estimate for both ride type (cabTaxi Go and cabTaxi Premier)
+- payment with Stripe, fare is calculated again on server side so nobody can change the price from browser
+- live ride tracking - Finding driver > Driver on the way > Trip started > Completed
+- cancel ride - full refund if driver not accepted yet, ₹25 fee after driver accept
+- rate the driver (1 to 5 star) and write feedback after trip
+- ride history and receipt download as PDF
 
-**Driver**
-- Driver mode dashboard with new ride requests (auto-refresh)
-- Accept → Start trip → Complete trip
-- Earnings (80% of fare), completed trips, and average rating
+**Driver side**
+- driver mode with online / offline button
+- new ride request comes automatically (refresh every 5 sec)
+- accept ride > start trip > complete trip
+- shows earning (driver get 80% of fare), total trips and average rating
 
-## Project structure
+## Folder Structure
 
 ```
 app/
-  page.jsx                     Landing page
-  dashboard/                   Rider dashboard
-  book-ride/                   Map, fare, Stripe checkout
-  ride/[id]/                   Live ride tracking, cancel, rating
-  receipt/[id]/                Printable / PDF receipt
-  ride-history/                Rider's past trips
-  driver/                      Driver dashboard
+  page.jsx                     landing page
+  dashboard/                   rider home
+  book-ride/                   map, fare and stripe payment
+  ride/[id]/                   live ride tracking, cancel, rating
+  receipt/[id]/                receipt page (save as pdf)
+  ride-history/                past trips of rider
+  driver/                      driver dashboard
   api/
-    geocode/                   Address search + reverse geocoding (Nominatim)
-    create-payment-intent/     Server-side fare + Stripe PaymentIntent
-    rides/                     Save ride after verified payment, list my rides
-    rides/[id]/                Ride details + accept/start/complete/cancel/rate
-    driver/rides/              Open requests + driver's trips
-  components/                  RideMap, CheckoutForm, RatingModal
-  lib/                         fare rules, ride status, Supabase clients
-supabase/                      SQL to set up the rides table
-middleware.js                  Clerk route protection
+    geocode/                   address search and reverse geocode
+    create-payment-intent/     fare calculate on server + stripe payment
+    rides/                     save ride after payment, get my rides
+    rides/[id]/                ride details + accept/start/complete/cancel/rate
+    driver/rides/              open requests and driver trips
+  components/                  RideMap, CheckoutForm, RatingModal, ui
+  lib/                         fare rules, ride status, supabase client
+supabase/                      sql files for database setup
+middleware.js                  clerk route protection
 ```
 
-## Running locally
+## How to run on local
 
-1. Install dependencies
+1. install packages
    ```bash
    npm install
    ```
-2. Create `.env.local` in the project root:
+2. make `.env.local` file in root folder and add your keys
    ```
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
    CLERK_SECRET_KEY=sk_test_...
@@ -71,7 +71,7 @@ middleware.js                  Clerk route protection
    NEXT_PUBLIC_SUPABASE_ANON_KEY=...
    SUPABASE_SERVICE_ROLE_KEY=...
    ```
-3. In Supabase → SQL Editor, create the table and run the two setup scripts:
+3. go to Supabase > SQL Editor and create the table first
    ```sql
    create table rides (
      id uuid default gen_random_uuid() primary key,
@@ -82,33 +82,34 @@ middleware.js                  Clerk route protection
      created_at timestamptz default now() not null
    );
    ```
-   then `supabase/rides_security.sql`, then `supabase/driver_flow.sql`.
-4. Start the app
+   after that run `supabase/rides_security.sql` and then `supabase/driver_flow.sql`
+4. start the app
    ```bash
    npm run dev
    ```
-   Open http://localhost:3000
+   open http://localhost:3000
 
-## Demo walkthrough
+## How to test (demo)
 
-1. Sign in as a **rider** → Dashboard → **Request a Cab**.
-2. Pick pickup & drop-off → **Proceed to Payment** → pay with test card `4242 4242 4242 4242`, any future date, any CVC.
-3. You land on the **live tracking page** ("Finding a driver").
-4. In an incognito window, sign in (another account or the same one) → Dashboard → **Go Online as Driver** → **Accept Ride** → **Start Trip** → **Complete Trip**.
-5. The rider's tracking page updates automatically. Rate the driver, then open the **Receipt** and save it as PDF.
+1. login as rider > click on "Where to?" and book a cab
+2. select pickup and drop, then pay with stripe test card `4242 4242 4242 4242` (any future date and any CVC)
+3. it will open live tracking page with "Finding your driver"
+4. open same link in incognito window, login (other account or same one is also ok) > go to **Drive** tab > Accept > Start trip > Complete trip
+5. rider screen will update by itself. after that give rating and open receipt to save as PDF
 
-## Security notes
+## Security
 
-- All pages except home / sign-in / sign-up require login (Clerk middleware).
-- Fare is calculated on the server from coordinates; the browser cannot set the price.
-- A ride is saved only after the server confirms with Stripe that the payment succeeded and belongs to the user.
-- The `rides` table has Row Level Security enabled; only the server (service role key) can read/write it, and every API checks the user owns the ride.
+- only home, sign in and sign up page is public, other all pages need login (clerk middleware)
+- fare is calculated on server from location, browser cannot send its own price
+- ride is saved only after server check with Stripe that payment is success and its of same user
+- RLS is on for `rides` table, only server can read/write with service role key, and every api check the user is owner of that ride
 
-## Future scope
+## Future Scope
 
-- Real-time updates with Supabase Realtime / WebSockets instead of polling
-- Live driver GPS location on the rider's map
-- Matching riders to the nearest available driver
-- Separate driver sign-up with vehicle/KYC details and Stripe Connect payouts
-- Promo codes, multi-stop rides, SOS button, help & support tickets
-- Emailed receipts, surge pricing, unit tests and CI/CD
+things i want to add later -
+- real time update with Supabase Realtime / WebSocket, right now it is polling every few sec
+- live driver location on rider map
+- match rider with nearest driver
+- separate driver signup with vehicle and KYC details, payout with Stripe Connect
+- promo code, multi stop ride, SOS button, help and support
+- receipt on email, surge pricing, unit testing and CI/CD
