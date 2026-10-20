@@ -32,3 +32,16 @@ export function isValidCoords(c) {
     Math.abs(c[1]) <= 180
   );
 }
+
+// Service area: Mumbai Metropolitan Region (Mumbai, Thane, Kalyan, Ulhasnagar, Navi Mumbai, Vasai-Virar...)
+export const SERVICE_AREA = { minLat: 18.85, maxLat: 19.65, minLon: 72.75, maxLon: 73.45 };
+export const SERVICE_AREA_NAME = 'Mumbai region';
+export const MAX_TRIP_KM = 80;
+
+export function inServiceArea(c) {
+  return (
+    isValidCoords(c) &&
+    c[0] >= SERVICE_AREA.minLat && c[0] <= SERVICE_AREA.maxLat &&
+    c[1] >= SERVICE_AREA.minLon && c[1] <= SERVICE_AREA.maxLon
+  );
+}

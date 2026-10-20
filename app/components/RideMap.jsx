@@ -57,10 +57,9 @@ export default function RideMap({
     // Default centre: Ulhasnagar / Kalyan / MMR region
     const map = L.map(mapContainerRef.current, { zoomControl: false }).setView([19.2215, 73.1645], 13);
 
-    // CARTO Voyager tiles (OpenStreetMap data) — cleaner, app-like basemap
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-      subdomains: 'abcd',
+    // OpenStreetMap tiles (free, no API key). Colours are softened in globals.css (.map-muted).
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 19,
     }).addTo(map);
 
@@ -121,5 +120,5 @@ export default function RideMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pickupCoords, dropoffCoords, routeGeometry]);
 
-  return <div ref={mapContainerRef} className={`isolate w-full cursor-crosshair ${className}`} />;
+  return <div ref={mapContainerRef} className={`map-muted isolate w-full cursor-crosshair ${className}`} />;
 }

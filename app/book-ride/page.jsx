@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from '../components/CheckoutForm';
-import { RIDE_TYPES, calcFare } from '../lib/fare';
+import { RIDE_TYPES, calcFare, inServiceArea, MAX_TRIP_KM, SERVICE_AREA_NAME } from '../lib/fare';
 import { POPULAR_PLACES } from '../lib/places';
 import { BackIcon, GpsIcon, CarIcon } from '../components/ui/Icons';
 
@@ -79,6 +79,7 @@ export default function BookRidePage() {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
         setPickupCoords([lat, lon]);
+        setNotice(null);
         try {
           const res = await fetch(`/api/geocode?lat=${lat}&lon=${lon}`);
           const data = await res.json();
@@ -98,6 +99,7 @@ export default function BookRidePage() {
   };
 
   const selectPlace = (type, name, coords) => {
+    setNotice(null);
     if (type === 'pickup') {
       setPickup(name);
       setPickupCoords(coords);
@@ -113,6 +115,7 @@ export default function BookRidePage() {
 
   const updateLocationFromCoords = async (coords, type) => {
     const [lat, lon] = coords;
+    setNotice(null);
     if (type === 'pickup') {
       setPickupCoords(coords);
       setPickup('Finding address…');
@@ -220,7 +223,14 @@ export default function BookRidePage() {
 
   // Estimate shown to the user. The real charge is recalculated on the server.
   const estimatedFare = calcFare(distanceKm, rideType);
-  const canBook = Boolean(pickupCoords && dropoffCoords && distanceKm > 0 && !routeLoading);
+  // Service area check (the server checks this again before charging)
+  const areaProblem =
+    (pickupCoords && !inServiceArea(pickupCoords)) || (dropoffCoords && !inServiceArea(dropoffCoords))
+      ? `cabTaxi only runs within the ${SERVICE_AREA_NAME} right now. Pick places in Mumbai, Thane, Kalyan, Ulhasnagar or Navi Mumbai.`
+      : distanceKm > MAX_TRIP_KM
+        ? `This trip is ${distanceKm.toFixed(0)} km. Trips are limited to ${MAX_TRIP_KM} km.`
+        : null;
+  const canBook = Boolean(pickupCoords && dropoffCoords && distanceKm > 0 && !routeLoading && !areaProblem);
 
   // Save the paid ride. The server verifies the payment with Stripe before saving.
   const saveRide = async (paymentIntentId) => {
@@ -396,6 +406,9 @@ export default function BookRidePage() {
                 {notice && (
                   <p className="rounded-xl bg-stop-soft px-4 py-3 text-sm text-stop" role="alert">{notice}</p>
                 )}
+                {areaProblem && (
+                  <p className="rounded-xl bg-stop-soft px-4 py-3 text-sm text-stop" role="alert">{areaProblem}</p>
+                )}
 
                 {/* Before a route exists: shortcuts. After: ride options. */}
                 {!pickupCoords || !dropoffCoords ? (
@@ -419,7 +432,7 @@ export default function BookRidePage() {
                       ))}
                     </div>
                   </div>
-                ) : (
+                ) : areaProblem ? null : (
                   <div>
                     <div className="mb-3 flex items-baseline justify-between">
                       <h2 className="font-display text-lg font-bold">Choose a ride</h2>
@@ -473,7 +486,9 @@ export default function BookRidePage() {
                 <button type="submit" disabled={!canBook} className="btn-primary w-full">
                   {canBook
                     ? `Book ${rideType.replace('cabTaxi ', '')} · ₹${estimatedFare}`
-                    : routeLoading
+                    : areaProblem
+                      ? 'Outside service area'
+                      : routeLoading
                       ? 'Finding the best route…'
                       : 'Set pickup and drop-off'}
                 </button>

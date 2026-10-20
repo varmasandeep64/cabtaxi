@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import Stripe from 'stripe';
-import { RIDE_TYPES, calcFare, haversineKm, isValidCoords } from '../../lib/fare';
+import {
+  RIDE_TYPES,
+  calcFare,
+  haversineKm,
+  isValidCoords,
+  inServiceArea,
+  MAX_TRIP_KM,
+  SERVICE_AREA_NAME,
+} from '../../lib/fare';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -39,7 +47,17 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid pickup or drop-off location.' }, { status: 400 });
     }
 
+    if (!inServiceArea(pickupCoords) || !inServiceArea(dropoffCoords)) {
+      return NextResponse.json(
+        { error: `cabTaxi only runs within the ${SERVICE_AREA_NAME} right now.` },
+        { status: 400 }
+      );
+    }
+
     const distanceKm = await getRouteKm(pickupCoords, dropoffCoords);
+    if (distanceKm > MAX_TRIP_KM) {
+      return NextResponse.json({ error: `Trips are limited to ${MAX_TRIP_KM} km.` }, { status: 400 });
+    }
     const amount = calcFare(distanceKm, rideType);
     if (!amount) {
       return NextResponse.json({ error: 'Could not calculate fare.' }, { status: 400 });

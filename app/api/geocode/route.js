@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { SERVICE_AREA } from '../../lib/fare';
 
 const HEADERS = { 'User-Agent': 'cabTaxi-MVP/1.0' };
 
@@ -22,7 +23,7 @@ export async function GET(request) {
     // Forward search: text -> list of places
     if (!q) return NextResponse.json([]);
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=in&addressdetails=1&limit=5`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=in&addressdetails=1&limit=5&bounded=1&viewbox=${SERVICE_AREA.minLon},${SERVICE_AREA.maxLat},${SERVICE_AREA.maxLon},${SERVICE_AREA.minLat}`,
       { headers: HEADERS }
     );
     const data = await res.json();
