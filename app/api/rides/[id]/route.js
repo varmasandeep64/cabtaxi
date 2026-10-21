@@ -69,9 +69,11 @@ export async function PATCH(request, { params }) {
           return json({ error: 'This ride is no longer available.' }, 409);
         }
         const user = await currentUser();
+        const emailName = user?.emailAddresses?.[0]?.emailAddress?.split('@')[0];
         const driverName =
           [user?.firstName, user?.lastName].filter(Boolean).join(' ') ||
-          user?.emailAddresses?.[0]?.emailAddress ||
+          user?.username ||
+          (emailName ? emailName.charAt(0).toUpperCase() + emailName.slice(1) : '') ||
           'Driver';
         return transition('paid', {
           driver_id: userId,

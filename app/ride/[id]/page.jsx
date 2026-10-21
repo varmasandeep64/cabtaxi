@@ -6,7 +6,7 @@ import Link from 'next/link';
 import AppShell from '../../components/ui/AppShell';
 import RatingModal from '../../components/RatingModal';
 import { CarIcon, ReceiptIcon, StarIcon } from '../../components/ui/Icons';
-import { STATUS_STEPS, CANCEL_FEE_AFTER_ACCEPT } from '../../lib/rideStatus';
+import { STATUS_STEPS, CANCEL_FEE_AFTER_ACCEPT, displayName } from '../../lib/rideStatus';
 
 const HEADLINE = {
   paid: { title: 'Finding your driver', sub: 'Hang tight — nearby drivers are seeing your request.' },
@@ -137,13 +137,13 @@ export default function RideTrackingPage() {
         {ride.driver_name && (
           <section className="flex items-center gap-4 rounded-3xl bg-surface p-4">
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-ink font-display text-lg font-bold text-taxi">
-              {initials(ride.driver_name)}
+              {initials(displayName(ride.driver_name))}
             </span>
-            <span className="flex-1">
+            <span className="min-w-0 flex-1">
               <span className="block text-sm text-road">Your driver</span>
-              <span className="block font-display text-lg font-bold">{ride.driver_name}</span>
+              <span className="block truncate font-display text-lg font-bold">{displayName(ride.driver_name)}</span>
             </span>
-            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold">
+            <span className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-semibold">
               {ride.ride_type.replace('cabTaxi ', '')}
             </span>
           </section>
@@ -189,7 +189,7 @@ export default function RideTrackingPage() {
               </div>
             ) : (
               <RatingModal
-                driverName={ride.driver_name}
+                driverName={displayName(ride.driver_name)}
                 onSubmitRating={({ rating, feedback }) => patch({ action: 'rate', rating, feedback })}
               />
             )}

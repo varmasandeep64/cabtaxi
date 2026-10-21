@@ -17,3 +17,10 @@ export const CANCEL_FEE_AFTER_ACCEPT = 25;
 
 // Share of the fare paid to the driver
 export const DRIVER_SHARE = 0.8;
+
+// Show a friendly name: older rides may have the driver's email saved as their name
+export function displayName(name) {
+  if (!name) return '';
+  const base = name.includes('@') ? name.split('@')[0] : name;
+  return base.charAt(0).toUpperCase() + base.slice(1);
+}

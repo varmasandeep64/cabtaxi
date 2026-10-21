@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '../../components/ui/Logo';
 import { BackIcon } from '../../components/ui/Icons';
-import { statusLabel } from '../../lib/rideStatus';
+import { statusLabel, displayName } from '../../lib/rideStatus';
 
 const fmt = (d) =>
   d ? new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
@@ -73,7 +73,7 @@ export default function ReceiptPage() {
                 <dl className="mt-6 divide-y divide-surface-2 border-y border-surface-2">
                   <Row label="Ride">{ride.ride_type}</Row>
                   <Row label="Status">{statusLabel(ride.status)}</Row>
-                  <Row label="Driver">{ride.driver_name || '—'}</Row>
+                  <Row label="Driver">{displayName(ride.driver_name) || '—'}</Row>
                   <Row label="Pickup"><span className="line-clamp-2">{ride.pickup}</span></Row>
                   <Row label="Drop-off"><span className="line-clamp-2">{ride.dropoff}</span></Row>
                   <Row label="Trip started">{fmt(ride.started_at)}</Row>

@@ -8,6 +8,7 @@ export default function CheckoutForm({ amount, rideType, pickup, dropoff, onSucc
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,7 +54,17 @@ export default function CheckoutForm({ amount, rideType, pickup, dropoff, onSucc
         </button>
       </div>
 
-      <PaymentElement />
+      {!ready && (
+        <div className="space-y-3" aria-live="polite">
+          <div className="h-12 animate-pulse rounded-xl bg-surface" />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="h-12 animate-pulse rounded-xl bg-surface" />
+            <div className="h-12 animate-pulse rounded-xl bg-surface" />
+          </div>
+          <p className="text-center text-sm text-road">Loading secure payment…</p>
+        </div>
+      )}
+      <PaymentElement onReady={() => setReady(true)} options={{ layout: 'tabs' }} />
 
       {errorMessage && (
         <p className="rounded-xl bg-stop-soft px-4 py-3 text-sm text-stop" role="alert">
@@ -61,7 +72,7 @@ export default function CheckoutForm({ amount, rideType, pickup, dropoff, onSucc
         </p>
       )}
 
-      <button type="submit" disabled={isProcessing || !stripe || !elements} className="btn-primary w-full">
+      <button type="submit" disabled={isProcessing || !ready || !stripe || !elements} className="btn-primary w-full">
         {isProcessing ? 'Processing…' : `Pay ₹${amount} and book`}
       </button>
       <p className="text-center text-xs text-road">Secured by Stripe. Test card: 4242 4242 4242 4242</p>

@@ -28,7 +28,7 @@ export default function RatingModal({ onSubmitRating, driverName }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-center">
       <div>
-        <h3 className="font-display text-xl font-bold">How was your ride{driverName ? ` with ${driverName.split(' ')[0]}` : ''}?</h3>
+        <h3 className="break-words font-display text-xl font-bold">How was your ride{driverName ? ` with ${driverName.split(' ')[0]}` : ''}?</h3>
         <p className="mt-1 text-sm text-road">{LABELS[rating]}</p>
       </div>
       <div className="flex justify-center gap-1" role="radiogroup" aria-label="Rating">

@@ -52,6 +52,7 @@ export default function BookRidePage() {
   const [chargedAmount, setChargedAmount] = useState(null); // fare confirmed by the server
   const [saveError, setSaveError] = useState(null);
   const [notice, setNotice] = useState(null);
+  const [searching, setSearching] = useState(null); // 'pickup' | 'dropoff' | null
 
   // Destination passed from the home screen shortcuts (?to=...&lat=...&lon=...)
   useEffect(() => {
@@ -143,12 +144,15 @@ export default function BookRidePage() {
       return;
     }
     const timer = setTimeout(async () => {
+      setSearching('pickup');
       try {
         const res = await fetch(`/api/geocode?q=${encodeURIComponent(pickup)}`);
         const data = await res.json();
         setPickupSuggestions(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
+      } finally {
+        setSearching(null);
       }
     }, 350);
     return () => clearTimeout(timer);
@@ -161,12 +165,15 @@ export default function BookRidePage() {
       return;
     }
     const timer = setTimeout(async () => {
+      setSearching('dropoff');
       try {
         const res = await fetch(`/api/geocode?q=${encodeURIComponent(dropoff)}`);
         const data = await res.json();
         setDropoffSuggestions(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
+      } finally {
+        setSearching(null);
       }
     }, 350);
     return () => clearTimeout(timer);
@@ -372,6 +379,7 @@ export default function BookRidePage() {
                         id="pickup"
                         type="text"
                         autoComplete="off"
+                        spellCheck={false}
                         value={pickup}
                         onFocus={() => setActiveInput('pickup')}
                         onChange={(e) => {
@@ -381,6 +389,9 @@ export default function BookRidePage() {
                         placeholder="Pickup location"
                         className="field"
                       />
+                      {activeInput === 'pickup' && searching === 'pickup' && pickupSuggestions.length === 0 && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-road">Searching…</span>
+                      )}
                       {activeInput === 'pickup' && suggestionList(pickupSuggestions, 'pickup')}
                     </div>
                     <div className="relative">
@@ -389,6 +400,7 @@ export default function BookRidePage() {
                         id="dropoff"
                         type="text"
                         autoComplete="off"
+                        spellCheck={false}
                         value={dropoff}
                         onFocus={() => setActiveInput('dropoff')}
                         onChange={(e) => {
@@ -398,6 +410,9 @@ export default function BookRidePage() {
                         placeholder="Where to?"
                         className="field"
                       />
+                      {activeInput === 'dropoff' && searching === 'dropoff' && dropoffSuggestions.length === 0 && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-road">Searching…</span>
+                      )}
                       {activeInput === 'dropoff' && suggestionList(dropoffSuggestions, 'dropoff')}
                     </div>
                   </div>
@@ -418,7 +433,7 @@ export default function BookRidePage() {
                       {activeInput === 'pickup' || !pickupCoords ? 'pickup' : 'drop-off'}:
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {POPULAR_PLACES.map((p) => (
+                      {POPULAR_PLACES.filter((p) => p.name !== pickup && p.name !== dropoff).map((p) => (
                         <button
                           key={p.name}
                           type="button"
