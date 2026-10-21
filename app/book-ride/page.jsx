@@ -10,6 +10,7 @@ import CheckoutForm from '../components/CheckoutForm';
 import { RIDE_TYPES, calcFare, inServiceArea, MAX_TRIP_KM, SERVICE_AREA_NAME } from '../lib/fare';
 import { POPULAR_PLACES } from '../lib/places';
 import { BackIcon, GpsIcon, CarIcon } from '../components/ui/Icons';
+import { TabBar } from '../components/ui/AppShell';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
@@ -319,7 +320,7 @@ export default function BookRidePage() {
     <div className="min-h-[100dvh]">
       <div className="relative mx-auto flex h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-white md:shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
         {/* Map */}
-        <div className="relative h-[42dvh] min-h-[240px] shrink-0">
+        <div className="relative h-[36dvh] min-h-[200px] shrink-0">
           <RideMap
             className="h-full"
             bottomPadding={50}
@@ -497,7 +498,7 @@ export default function BookRidePage() {
                 )}
               </div>
 
-              <div className="border-t border-surface-2 bg-white px-5 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+              <div className="border-t border-surface-2 bg-white px-5 pb-3 pt-3">
                 <button type="submit" disabled={!canBook} className="btn-primary w-full">
                   {canBook
                     ? `Book ${rideType.replace('cabTaxi ', '')} · ₹${estimatedFare}`
@@ -557,6 +558,7 @@ export default function BookRidePage() {
             </div>
           )}
         </section>
+        <TabBar inline />
       </div>
     </div>
   );

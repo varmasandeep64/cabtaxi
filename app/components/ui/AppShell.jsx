@@ -16,7 +16,6 @@ const TABS = [
  * On desktop it sits centred like a device, so the app always looks the way it does on a phone.
  */
 export default function AppShell({ title, back, right, children, tabs = true, night = false, bare = false }) {
-  const pathname = usePathname();
 
   return (
     <div className={`min-h-[100dvh] ${night ? 'theme-night' : ''}`}>
@@ -49,43 +48,54 @@ export default function AppShell({ title, back, right, children, tabs = true, ni
 
         <main className={`flex-1 ${tabs ? 'pb-24' : ''}`}>{children}</main>
 
-        {tabs && (
-          <nav
-            aria-label="Main"
-            className={`fixed bottom-0 left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 border-t pb-[env(safe-area-inset-bottom)] ${
-              night ? 'border-night-3 bg-night' : 'border-surface-2 bg-white'
-            }`}
-          >
-            <ul className="grid grid-cols-4">
-              {TABS.map(({ href, label, Icon }) => {
-                const active = pathname === href || pathname.startsWith(href + '/');
-                return (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      aria-current={active ? 'page' : undefined}
-                      className={`flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold ${
-                        active
-                          ? night ? 'text-taxi' : 'text-ink'
-                          : night ? 'text-road-light' : 'text-road'
-                      }`}
-                    >
-                      <span
-                        className={`flex h-8 w-14 items-center justify-center rounded-full transition ${
-                          active ? (night ? 'bg-night-3' : 'bg-taxi') : ''
-                        }`}
-                      >
-                        <Icon size={20} />
-                      </span>
-                      {label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-        )}
+        {tabs && <TabBar night={night} />}
       </div>
     </div>
+  );
+}
+
+/**
+ * Bottom tab bar. `inline` places it in the page flow (used by the full-height
+ * booking screen) instead of fixing it to the bottom of the viewport.
+ */
+export function TabBar({ night = false, inline = false }) {
+  const pathname = usePathname();
+  return (
+    <nav
+      aria-label="Main"
+      className={`${
+        inline ? 'relative shrink-0' : 'fixed bottom-0 left-1/2 w-full max-w-[480px] -translate-x-1/2'
+      } z-40 border-t pb-[env(safe-area-inset-bottom)] ${
+        night ? 'border-night-3 bg-night' : 'border-surface-2 bg-white'
+      }`}
+    >
+      <ul className="grid grid-cols-4">
+        {TABS.map(({ href, label, Icon }) => {
+          const active = pathname === href || pathname.startsWith(href + '/');
+          return (
+            <li key={href}>
+              <Link
+                href={href}
+                aria-current={active ? 'page' : undefined}
+                className={`flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold ${
+                  active
+                    ? night ? 'text-taxi' : 'text-ink'
+                    : night ? 'text-road-light' : 'text-road'
+                }`}
+              >
+                <span
+                  className={`flex h-8 w-14 items-center justify-center rounded-full transition ${
+                    active ? (night ? 'bg-night-3' : 'bg-taxi') : ''
+                  }`}
+                >
+                  <Icon size={20} />
+                </span>
+                {label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }
